@@ -2,6 +2,8 @@ import { Calendar, Clock, MapPin, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
 
 interface Event {
   id: number;
@@ -64,9 +66,33 @@ const events: Event[] = [
 ];
 
 const Events = () => {
+  const [whatsappContact, setWhatsappContact] = useState<string>("1234567890");
+
+  useEffect(() => {
+    fetchWhatsAppContact();
+  }, []);
+
+  const fetchWhatsAppContact = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("settings")
+        .select("value")
+        .eq("key", "whatsapp_contact")
+        .maybeSingle();
+
+      if (error) throw error;
+      
+      if (data) {
+        setWhatsappContact(data.value);
+      }
+    } catch (error) {
+      console.error("Error fetching WhatsApp contact:", error);
+    }
+  };
+
   const handleBookWhatsApp = (event: Event) => {
     const message = `Hi! I'd like to book the event: ${event.name} on ${event.date} at ${event.time}`;
-    const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/${whatsappContact}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, "_blank");
   };
 

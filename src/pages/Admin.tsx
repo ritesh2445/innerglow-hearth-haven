@@ -1,9 +1,95 @@
-import { Lock, Calendar, MessageSquare, Quote } from "lucide-react";
+import { Lock, Calendar, MessageSquare, Quote, Save } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+
+const whatsappSchema = z.object({
+  whatsapp_contact: z.string()
+    .min(1, "WhatsApp contact is required")
+    .max(100, "WhatsApp contact must be less than 100 characters")
+    .trim(),
+});
+
+type WhatsAppFormValues = z.infer<typeof whatsappSchema>;
 
 const Admin = () => {
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const form = useForm<WhatsAppFormValues>({
+    resolver: zodResolver(whatsappSchema),
+    defaultValues: {
+      whatsapp_contact: "",
+    },
+  });
+
+  useEffect(() => {
+    fetchWhatsAppContact();
+  }, []);
+
+  const fetchWhatsAppContact = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("settings")
+        .select("value")
+        .eq("key", "whatsapp_contact")
+        .maybeSingle();
+
+      if (error) throw error;
+      
+      if (data) {
+        form.reset({ whatsapp_contact: data.value });
+      }
+    } catch (error) {
+      console.error("Error fetching WhatsApp contact:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load WhatsApp contact",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const onSubmit = async (values: WhatsAppFormValues) => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase
+        .from("settings")
+        .upsert({
+          key: "whatsapp_contact",
+          value: values.whatsapp_contact.trim(),
+        }, {
+          onConflict: "key",
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "WhatsApp contact updated successfully",
+      });
+    } catch (error) {
+      console.error("Error updating WhatsApp contact:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update WhatsApp contact",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
@@ -37,8 +123,54 @@ const Admin = () => {
               </Button>
             </div>
 
+            {/* WhatsApp Configuration */}
+            <Card className="shadow-soft border-border animate-fade-in">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageSquare className="text-primary" size={24} />
+                  WhatsApp Configuration
+                </CardTitle>
+                <CardDescription>
+                  Set the WhatsApp phone number or link for event bookings
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="whatsapp_contact"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>WhatsApp Contact</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="1234567890 or wa.me/1234567890"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Enter a phone number (e.g., 1234567890) or WhatsApp link
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button
+                      type="submit"
+                      disabled={isLoading}
+                      className="w-full shadow-soft"
+                    >
+                      <Save className="mr-2" size={18} />
+                      {isLoading ? "Saving..." : "Save Configuration"}
+                    </Button>
+                  </form>
+                </Form>
+              </CardContent>
+            </Card>
+
             {/* Management Options */}
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-3 gap-6 mt-8">
               <div className="bg-card rounded-2xl p-6 shadow-soft border border-border hover:shadow-medium transition-smooth text-center animate-fade-in">
                 <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <Calendar className="text-primary" size={32} />
