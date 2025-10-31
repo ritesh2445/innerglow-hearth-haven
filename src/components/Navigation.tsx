@@ -1,11 +1,59 @@
-import { Link, useLocation } from "react-router-dom";
-import { Menu, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Menu, X, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    checkUser();
+    
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        checkAdminRole(session.user.id);
+      } else {
+        setIsAdmin(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const checkUser = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    setUser(session?.user ?? null);
+    if (session?.user) {
+      checkAdminRole(session.user.id);
+    }
+  };
+
+  const checkAdminRole = async (userId: string) => {
+    const { data } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .eq("role", "admin")
+      .maybeSingle();
+    setIsAdmin(!!data);
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    toast({
+      title: "Signed out",
+      description: "You've been successfully signed out",
+    });
+    navigate("/");
+  };
 
   const navLinks = [
     { path: "/", label: "Home" },
@@ -45,11 +93,40 @@ const Navigation = () => {
                 {link.label}
               </Link>
             ))}
-            <Link to="/admin">
-              <Button variant="outline" size="sm" className="ml-4">
-                Admin
-              </Button>
-            </Link>
+            {isAdmin && (
+              <Link to="/admin">
+                <Button variant="outline" size="sm" className="ml-4">
+                  Admin
+                </Button>
+              </Link>
+            )}
+            <div className="ml-4 flex items-center gap-2">
+              {user ? (
+                <>
+                  <span className="text-sm text-muted-foreground flex items-center gap-2">
+                    <User size={16} />
+                    {user.email}
+                  </span>
+                  <Button
+                    onClick={handleSignOut}
+                    variant="outline"
+                    size="sm"
+                    className="shadow-soft"
+                  >
+                    <LogOut size={16} className="mr-2" />
+                    Sign Out
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  onClick={() => navigate("/auth")}
+                  size="sm"
+                  className="shadow-soft"
+                >
+                  Sign In
+                </Button>
+              )}
+            </div>
           </div>
 
           {/* Mobile Menu Button */}
@@ -79,11 +156,43 @@ const Navigation = () => {
                   {link.label}
                 </Link>
               ))}
-              <Link to="/admin" onClick={() => setIsOpen(false)}>
-                <Button variant="outline" className="w-full">
-                  Admin
-                </Button>
-              </Link>
+              {isAdmin && (
+                <Link to="/admin" onClick={() => setIsOpen(false)}>
+                  <Button variant="outline" className="w-full">
+                    Admin
+                  </Button>
+                </Link>
+              )}
+              <div className="pt-4 border-t border-border space-y-3">
+                {user ? (
+                  <>
+                    <p className="text-sm text-muted-foreground px-4">
+                      Signed in as: {user.email}
+                    </p>
+                    <Button
+                      onClick={() => {
+                        handleSignOut();
+                        setIsOpen(false);
+                      }}
+                      variant="outline"
+                      className="w-full shadow-soft"
+                    >
+                      <LogOut size={16} className="mr-2" />
+                      Sign Out
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    onClick={() => {
+                      navigate("/auth");
+                      setIsOpen(false);
+                    }}
+                    className="w-full shadow-soft"
+                  >
+                    Sign In
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         )}
