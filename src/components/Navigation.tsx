@@ -63,7 +63,7 @@ const Navigation = () => {
     { path: "/volunteers", label: "Volunteers" },
     { path: "/faq", label: "FAQ" },
     { path: "/updates", label: "Updates" },
-    { path: "/memory-lane", label: "Memory Lane" },
+    { path: "/memory-lane", label: "Gallery" },
     { path: "/contact", label: "Contact" },
   ];
 
