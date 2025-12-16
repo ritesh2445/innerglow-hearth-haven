@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Lock, Calendar, MessageSquare, Quote, Save, Plus, Edit, Trash2, HelpCircle, Users, Phone, Bell, Image as ImageIcon, Upload, Video } from "lucide-react";
+import { Lock, Calendar, MessageSquare, Quote, Save, Plus, Edit, Trash2, HelpCircle, Users, Phone, Bell, Image as ImageIcon, Upload, Video, UserCheck } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -78,6 +78,14 @@ const gallerySchema = z.object({
   display_order: z.number().int().min(0).default(0),
 });
 
+const founderSchema = z.object({
+  name: z.string().min(1).max(100).trim(),
+  role: z.string().max(100).trim().optional(),
+  bio: z.string().min(1).max(1000).trim(),
+  image_url: z.string().max(500).trim().optional(),
+  display_order: z.number().int().min(0).default(0),
+});
+
 type WhatsAppFormValues = z.infer<typeof whatsappSchema>;
 type EventFormValues = z.infer<typeof eventSchema>;
 type TestimonialFormValues = z.infer<typeof testimonialSchema>;
@@ -87,6 +95,7 @@ type VolunteerFormValues = z.infer<typeof volunteerSchema>;
 type ContactFormValues = z.infer<typeof contactSchema>;
 type PostFormValues = z.infer<typeof postSchema>;
 type GalleryFormValues = z.infer<typeof gallerySchema>;
+type FounderFormValues = z.infer<typeof founderSchema>;
 
 const Admin = () => {
   const { toast } = useToast();

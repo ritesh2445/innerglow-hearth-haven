@@ -2,6 +2,7 @@ import { Calendar, Clock, MapPin, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import AddToCalendar from "@/components/AddToCalendar";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 
@@ -151,14 +152,26 @@ const Events = () => {
                     </div>
                   )}
                   
-                  <Button 
-                    onClick={() => handleBookWhatsApp(event)}
-                    className="w-full shadow-soft"
-                    disabled={!event.is_booking_open}
-                  >
-                    <MessageCircle className="mr-2" size={18} />
-                    {event.is_booking_open ? "Book via WhatsApp" : "Booking Closed"}
-                  </Button>
+                  <div className="flex flex-col gap-3">
+                    <Button 
+                      onClick={() => handleBookWhatsApp(event)}
+                      className="w-full shadow-soft"
+                      disabled={!event.is_booking_open}
+                    >
+                      <MessageCircle className="mr-2" size={18} />
+                      {event.is_booking_open ? "Book via WhatsApp" : "Booking Closed"}
+                    </Button>
+                    
+                    {event.is_booking_open && (
+                      <AddToCalendar
+                        eventName={event.name}
+                        eventDate={event.date}
+                        eventTime={event.time}
+                        eventLocation={event.location}
+                        eventDescription={event.description}
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
             ))}

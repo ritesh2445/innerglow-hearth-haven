@@ -58,13 +58,15 @@ const Navigation = () => {
 
   const navLinks = [
     { path: "/", label: "Home" },
+    { path: "/founders", label: "Founders" },
     { path: "/events", label: "Events" },
+    { path: "/services", label: "Services" },
+    { path: "/therapies", label: "Therapies" },
+    { path: "/event-organising", label: "Event Organising" },
     { path: "/testimonials", label: "Testimonials" },
-    { path: "/volunteers", label: "Volunteers" },
-    { path: "/faq", label: "FAQ" },
-    { path: "/updates", label: "Updates" },
     { path: "/memory-lane", label: "Gallery" },
-    { path: "/contact", label: "Contact" },
+    { path: "/faq", label: "FAQs" },
+    { path: "/contact", label: "Contact Us" },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -80,12 +82,12 @@ const Navigation = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-1">
+          <div className="hidden lg:flex items-center space-x-1">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
-                className={`px-4 py-2 rounded-lg font-medium transition-glow ${
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-glow ${
                   isActive(link.path)
                     ? "bg-primary text-primary-foreground shadow-[0_0_25px_rgba(255,127,107,0.4)]"
                     : "hover:bg-secondary hover:shadow-[0_0_20px_rgba(255,243,199,0.5)] hover:scale-105"
@@ -96,28 +98,22 @@ const Navigation = () => {
             ))}
             {user && (
               <Link to="/admin">
-                <Button variant="outline" size="sm" className="ml-4">
+                <Button variant="outline" size="sm" className="ml-2">
                   Admin
                 </Button>
               </Link>
             )}
-            <div className="ml-4 flex items-center gap-2">
+            <div className="ml-2 flex items-center gap-2">
               {user ? (
-                <>
-                  <span className="text-sm text-muted-foreground flex items-center gap-2">
-                    <User size={16} />
-                    {user.email}
-                  </span>
-                  <Button
-                    onClick={handleSignOut}
-                    variant="outline"
-                    size="sm"
-                    className="shadow-soft"
-                  >
-                    <LogOut size={16} className="mr-2" />
-                    Sign Out
-                  </Button>
-                </>
+                <Button
+                  onClick={handleSignOut}
+                  variant="outline"
+                  size="sm"
+                  className="shadow-soft"
+                >
+                  <LogOut size={16} className="mr-2" />
+                  Sign Out
+                </Button>
               ) : (
                 <Button
                   onClick={() => navigate("/auth")}
@@ -133,7 +129,7 @@ const Navigation = () => {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-secondary transition-smooth"
+            className="lg:hidden p-2 rounded-lg hover:bg-secondary transition-smooth"
           >
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -141,7 +137,7 @@ const Navigation = () => {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="md:hidden py-4 animate-fade-in">
+          <div className="lg:hidden py-4 animate-fade-in max-h-[calc(100vh-4rem)] overflow-y-auto">
             <div className="flex flex-col space-y-2">
               {navLinks.map((link) => (
                 <Link

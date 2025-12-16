@@ -4,7 +4,7 @@ import { Calendar, Heart, Users, Sparkles } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import QuoteBox from "@/components/QuoteBox";
-import heroImage from "@/assets/hero-image.jpg";
+import HeroCarousel from "@/components/HeroCarousel";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -47,46 +47,8 @@ const Index = () => {
     <div className="min-h-screen flex flex-col">
       <Navigation />
       
-      {/* Hero Section */}
-      <section className="relative gradient-hero overflow-hidden">
-        <div className="container mx-auto px-4 py-20 md:py-32">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6 animate-fade-in-up">
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
-                A space to listen, heal, and{" "}
-                <span className="text-primary">grow</span>
-              </h1>
-              <p className="text-lg md:text-xl text-muted-foreground">
-                Join ListeningClub, a compassionate community dedicated to mental health
-                awareness and emotional wellbeing. You're not alone.
-              </p>
-              <div className="flex flex-wrap gap-4 pt-4">
-                <Link to="/events">
-                  <Button size="lg" className="shadow-medium">
-                    <Calendar className="mr-2" size={20} />
-                    Join a Session
-                  </Button>
-                </Link>
-                <Link to="/contact">
-                  <Button size="lg" variant="outline" className="shadow-soft">
-                    Learn More
-                  </Button>
-                </Link>
-              </div>
-            </div>
-            <div className="relative animate-scale-in">
-              <img
-                src={heroImage}
-                alt="ListeningClub Community"
-                className="rounded-3xl shadow-large w-full h-auto object-cover"
-              />
-              {/* Floating coral accents */}
-              <div className="absolute -top-8 -right-8 w-24 h-24 bg-primary/20 rounded-full blur-2xl animate-float animate-pulse-glow"></div>
-              <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-secondary/40 rounded-full blur-3xl animate-float" style={{ animationDelay: "1s" }}></div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Hero Carousel */}
+      <HeroCarousel />
 
       {/* Features Section */}
       <section className="py-20">
@@ -168,9 +130,9 @@ const Index = () => {
                   Book an Event
                 </Button>
               </Link>
-              <Link to="/volunteers">
+              <Link to="/founders">
                 <Button size="lg" variant="outline">
-                  Meet Our Volunteers
+                  Meet Our Founders
                 </Button>
               </Link>
             </div>

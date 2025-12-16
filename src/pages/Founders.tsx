@@ -1,0 +1,111 @@
+import { useState, useEffect } from "react";
+import Navigation from "@/components/Navigation";
+import Footer from "@/components/Footer";
+import { supabase } from "@/integrations/supabase/client";
+import { User } from "lucide-react";
+
+interface Founder {
+  id: string;
+  name: string;
+  role: string | null;
+  bio: string;
+  image_url: string;
+  display_order: number;
+}
+
+const Founders = () => {
+  const [founders, setFounders] = useState<Founder[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchFounders();
+  }, []);
+
+  const fetchFounders = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("founders")
+        .select("*")
+        .eq("is_active", true)
+        .order("display_order", { ascending: true });
+
+      if (error) throw error;
+      if (data) setFounders(data);
+    } catch (error) {
+      console.error("Error fetching founders:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Navigation />
+
+      {/* Header */}
+      <section className="gradient-hero py-16 md:py-24">
+        <div className="container mx-auto px-4 text-center">
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 animate-fade-in">
+            Meet Our Founders
+          </h1>
+          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto animate-fade-in-up">
+            The passionate individuals behind ListeningClub who are dedicated to making mental health support accessible to everyone.
+          </p>
+        </div>
+      </section>
+
+      {/* Founders Grid */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          {founders.length === 0 ? (
+            <div className="text-center py-12">
+              <User className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
+              <p className="text-muted-foreground text-lg">Founder information coming soon.</p>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {founders.map((founder, index) => (
+                <div
+                  key={founder.id}
+                  className="group bg-card rounded-2xl overflow-hidden shadow-soft hover:shadow-large transition-glow border border-border hover-glow-strong neon-border animate-fade-in"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <div className="aspect-square overflow-hidden">
+                    <img
+                      src={founder.image_url}
+                      alt={founder.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-smooth"
+                    />
+                  </div>
+                  <div className="p-6 space-y-3">
+                    <h3 className="text-2xl font-bold group-hover:text-primary transition-smooth">
+                      {founder.name}
+                    </h3>
+                    {founder.role && (
+                      <p className="text-primary font-medium">{founder.role}</p>
+                    )}
+                    <p className="text-muted-foreground leading-relaxed">
+                      {founder.bio}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      <Footer />
+    </div>
+  );
+};
+
+export default Founders;
